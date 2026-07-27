@@ -98,10 +98,11 @@ async function doLogin() {
     loginAs(username);
   } catch(e) {
     console.error("LOGIN ERROR:", e);
-    showAuthError(
-      'login-error',
-      e.message || J.SON.stringify(e)
-    );
+    var errMsg = 'Lỗi không xác định. Vui lòng thử lại!';
+    try {
+      errMsg = (e && e.message) ? e.message : JSON.stringify(e);
+    } catch (_) { /* giữ nguyên errMsg mặc định nếu stringify cũng lỗi */ }
+    showAuthError('login-error', errMsg);
   } finally {
     if (btn) { btn.disabled=false; btn.textContent='Đăng nhập'; }
   }
@@ -252,7 +253,14 @@ async function saveAll() {
 
     }
 }
-
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'hidden' && currentUser) {
+    saveAll();
+  }
+});
+window.addEventListener('pagehide', function() {
+  if (currentUser) saveAll();
+});
 // Stubs — không dùng nữa
 function getUserData(key, def) { return def !== undefined ? def : null; }
 function saveUserData(key, val) {}
