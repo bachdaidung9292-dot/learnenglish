@@ -91,10 +91,23 @@ async function doLogin() {
     if (!account){
       return showAuthError('login-error','Tên đăng nhập không tồn tại!');
     }
-    await pb.collection("users").authWithPassword(
-      account.email,
-      pass
-      );
+    // FIX: trước đây code chỉ đăng nhập bằng account.email lấy từ dbGetAccount().
+    // Nhưng vì PocketBase mặc định ẩn trường email (emailVisibility=false) với các
+    // tài khoản cũ (tạo trước khi có fix ở dbSaveAccount trong pb.js), account.email
+    // có thể trả về rỗng ("") -> authWithPassword("", pass) luôn bị PocketBase từ
+    // chối với lỗi "An error occurred while validating the submitted data.".
+    // Để không phụ thuộc vào email (có thể bị ẩn), thử đăng nhập bằng username trước
+    // (identity luôn có sẵn, không bao giờ rỗng); nếu PocketBase của bạn chỉ chấp nhận
+    // email làm identity thì sẽ tự động thử lại bằng email.
+    try {
+      await pb.collection("users").authWithPassword(username, pass);
+    } catch (errByUsername) {
+      if (!account.email) {
+        // Không có email khả dụng để thử lại -> báo lỗi rõ ràng thay vì lỗi PocketBase khó hiểu
+        throw new Error('Tài khoản này thiếu email khả dụng để xác thực. Vui lòng liên hệ quản trị viên để kiểm tra cấu hình tài khoản (emailVisibility / identity fields trên PocketBase).');
+      }
+      await pb.collection("users").authWithPassword(account.email, pass);
+    }
     loginAs(username);
   } catch(e) {
     console.error("LOGIN ERROR:", e);

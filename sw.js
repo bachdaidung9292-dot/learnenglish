@@ -1,7 +1,7 @@
 // =============================================
 //  Service Worker — ListenUp PWA
 // =============================================
-var CACHE_NAME = 'listenup-v1';
+var CACHE_NAME = 'listenup-v2'; // tăng version để buộc trình duyệt cập nhật service worker mới, xoá cache cũ
 var ASSETS = [
   '/learnenglish/',
   '/learnenglish/index.html',
@@ -36,8 +36,18 @@ self.addEventListener('activate', function(e) {
 
 // Fetch: dùng cache nếu offline, network nếu online
 self.addEventListener('fetch', function(e) {
-  // Không cache request đến Supabase API
-  if (e.request.url.includes('supabase.co')) {
+  // FIX: chỉ cache được request GET. Cache API của trình duyệt KHÔNG hỗ trợ
+  // cache request POST/PUT/PATCH/DELETE — trước đây code cố cache mọi request,
+  // kể cả các POST gửi tới PocketBase (đăng nhập, đăng ký, lưu dữ liệu...),
+  // gây lỗi console: "Failed to execute 'put' on 'Cache': Request method 'POST'
+  // is unsupported". Bỏ qua các request không phải GET để tránh lỗi này.
+  if (e.request.method !== 'GET') {
+    return;
+  }
+  // Không cache request đến Supabase API hoặc PocketBase API — đây là dữ liệu
+  // động (tài khoản, bài học, tiến độ...), cache lại có thể khiến app hiển thị
+  // dữ liệu cũ/sai giữa các thiết bị.
+  if (e.request.url.includes('supabase.co') || e.request.url.includes('pocketbase-production-29d1.up.railway.app')) {
     return;
   }
   e.respondWith(

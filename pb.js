@@ -123,7 +123,15 @@ async function dbSaveAccount(username, passHash, email) {
         username: username,
         password: passHash,
         passwordConfirm: passHash,
-        email: email
+        email: email,
+        // FIX QUAN TRỌNG: PocketBase mặc định emailVisibility = false, nghĩa là
+        // trường "email" sẽ trả về rỗng khi bất kỳ request nào chưa đăng nhập đọc
+        // record này (kể cả dbGetAccount lúc đăng nhập). Nếu không set true ở đây,
+        // sau này lúc doLogin() lấy account.email để gọi authWithPassword(), giá trị
+        // sẽ là "" (rỗng) -> PocketBase từ chối vì trường "identity" bắt buộc phải
+        // có 1-255 ký tự -> lỗi 400 "An error occurred while validating the submitted data."
+        // (chính là lỗi bạn đang gặp).
+        emailVisibility: true
     });
 }
 // =============================
