@@ -100,7 +100,7 @@ async function doLogin() {
     console.error("LOGIN ERROR:", e);
     showAuthError(
       'login-error',
-      "Sai tài khoản hoặc mật khẩu!"
+      e.message || J.SON.stringify(e)
     );
   } finally {
     if (btn) { btn.disabled=false; btn.textContent='Đăng nhập'; }
