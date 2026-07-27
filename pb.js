@@ -42,8 +42,8 @@ async function dbSet(username, key, value) {
 
         const list = await pb.collection(USER_DATA).getFullList({
 
-            filter: `username="${username}" && key="${key}"`
-
+            filter: `username="${username}" && key="${key}"`,
+            requestKey: null
         });
 
         if (list.length > 0) {
@@ -135,8 +135,8 @@ async function dbGet(username, key, defaultValue) {
 
         const list = await pb.collection(USER_DATA).getFullList({
 
-            filter: `username="${username}" && key="${key}"`
-
+            filter: `username="${username}" && key="${key}"`,
+            requestKey: null
         });
 
         if (list.length === 0) {
