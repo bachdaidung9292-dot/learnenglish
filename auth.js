@@ -224,23 +224,33 @@ console.log("reviews.length =", reviews.length);
 }
 
 async function saveAll() {
-  console.log('[ListenUp] saveAll → lessons:'+lessons.length+' decks:'+decks.length+' reviews:'+reviews.length);
-  try {
-    console.log("[saveAll] saving...");
+    console.log('[ListenUp] saveAll → lessons:' + lessons.length + ' decks:' + decks.length + ' reviews:' + reviews.length);
 
-await dbSet(currentUser, "lessons", lessons);
-console.log("✓ lessons");
+    try {
 
-await dbSet(currentUser, "decks", decks);
-console.log("✓ decks");
+        console.log("[saveAll] saving...");
 
-await dbSet(currentUser, "reviews", reviews);
-console.log("✓ reviews");
+        await dbSet(currentUser, "lessons", lessons);
+        console.log("✓ lessons");
 
-await dbSet(currentUser, "progress", progress);
-console.log("✓ progress");
+        await dbSet(currentUser, "decks", decks);
+        console.log("✓ decks");
 
-console.log("[saveAll] DONE");
+        await dbSet(currentUser, "reviews", reviews);
+        console.log("✓ reviews");
+
+        await dbSet(currentUser, "progress", progress);
+        console.log("✓ progress");
+
+        console.log("[saveAll] DONE");
+
+    } catch (e) {
+
+        console.error("[ListenUp] saveAll ❌", e);
+
+        toast("⚠️ Lỗi lưu dữ liệu: " + e.message);
+
+    }
 }
 
 // Stubs — không dùng nữa
